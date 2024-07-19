@@ -6,7 +6,6 @@ description = "A process guard that ensures the proper destruction of a child pr
 repository = "https://github.com/fplu/proc_guard"
 readme = "README.md"
 license = "MIT"
-license-file = "LICENSE"
 
 [workspace]
 members = ["utilities"]
