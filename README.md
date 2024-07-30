@@ -14,7 +14,7 @@ Add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-proc_guard = "0.1.0"
+proc_guard = "0.2.0"
 ```
 
 ## Usage

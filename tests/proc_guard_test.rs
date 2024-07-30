@@ -1,9 +1,11 @@
 #[cfg(test)]
 mod tests {
-    use proc_guard::{terminate, wait_timeout, ProcGuard, ProcessTermination};
+    use proc_guard::{terminate, ProcGuard, ProcessTermination};
     use std::thread;
     use std::time::Duration;
     use utilities;
+
+    use child_wait_timeout::ChildWT;
 
     #[test]
     fn test_send_process_termination() {
@@ -196,12 +198,12 @@ mod tests {
         let mut guard = ProcGuard::new(child, ProcessTermination::Wait);
 
         // Use mut_child to get a mutable reference to the child process
-        let mut child_ref = guard.mut_child();
+        let child_ref = guard.mut_child();
 
         // Ensure the PID is valid
         assert!(child_ref.id() > 0);
         // Ensure the process is still running
-        let result = wait_timeout(&mut child_ref, Duration::from_secs(1));
+        let result = child_ref.wait_timeout(Duration::from_secs(1));
         assert!(result.is_err()); // Should return a timeout error
     }
 
@@ -217,7 +219,7 @@ mod tests {
         assert!(released_child.id() > 0);
 
         // Ensure the process is still running
-        let result = wait_timeout(&mut released_child, Duration::from_secs(1));
+        let result = released_child.wait_timeout(Duration::from_secs(1));
         assert!(result.is_err()); // Should return a timeout error
     }
 

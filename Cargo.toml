@@ -1,6 +1,6 @@
 [package]
 name = "proc_guard"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 description = "A process guard that ensures the proper destruction of a child process in various scenarios"
 repository = "https://github.com/fplu/proc_guard"
@@ -13,6 +13,7 @@ members = ["utilities"]
 
 [dependencies]
 thiserror = "1.0"
+child_wait_timeout = "0.1.0"
 
 [target.'cfg(windows)'.dependencies]
 winapi = { version = "0.3", features = [

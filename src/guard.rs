@@ -5,7 +5,9 @@ use std::{
     time::Duration,
 };
 
-use crate::{error::Error, send_ctrl_c, wait_timeout};
+use child_wait_timeout::ChildWT;
+
+use crate::{error::Error, send_ctrl_c};
 
 /// Enum representing the various termination strategies available for a process guard.
 #[derive(Debug, Clone, Copy)]
@@ -272,13 +274,13 @@ impl ProcGuard {
 /// * `Err(Error)` - If an error occurs during termination.
 ///
 fn _wait_timeout_kill(child: &mut Child, timeout: Duration) -> Result<Option<ExitStatus>, Error> {
-    match wait_timeout(child, timeout) {
+    match child.wait_timeout(timeout) {
         Ok(v) => Ok(Some(v)),
-        Err(Error::Timeout) => {
+        Err(e) if e.kind() == std::io::ErrorKind::TimedOut => {
             child.kill()?;
             Ok(None)
         }
-        Err(e) => Err(e),
+        Err(e) => Err(e.into()),
     }
 }
 
@@ -332,7 +334,7 @@ pub fn terminate(
 ) -> Result<Option<ExitStatus>, Error> {
     match termination {
         ProcessTermination::Wait => Ok(Some(child.wait()?)),
-        ProcessTermination::WaitTimeout(timeout) => Ok(Some(wait_timeout(child, timeout)?)),
+        ProcessTermination::WaitTimeout(timeout) => Ok(Some(child.wait_timeout(timeout)?)),
         ProcessTermination::WaitTimeoutKill(timeout) => _wait_timeout_kill(child, timeout),
         ProcessTermination::CtrlC => {
             send_ctrl_c(child)?;
@@ -344,7 +346,7 @@ pub fn terminate(
         }
         ProcessTermination::CtrlCWaitTimeout(timeout) => {
             send_ctrl_c(child)?;
-            Ok(Some(wait_timeout(child, timeout)?))
+            Ok(Some(child.wait_timeout(timeout)?))
         }
         ProcessTermination::CtrlCWaitTimeoutKill(timeout) => {
             send_ctrl_c(child)?;
